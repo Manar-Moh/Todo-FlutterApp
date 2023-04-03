@@ -1,77 +1,58 @@
 import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:todo/modules/ArchiveScreen.dart';
 import 'package:todo/modules/DoneScreen.dart';
 import 'package:todo/modules/TasksScreen.dart';
 import 'package:todo/shared/components.dart';
+import 'package:todo/shared/cubit/cubit.dart';
+import 'package:todo/shared/cubit/states.dart';
 
 import '../models/database.dart';
 import '../shared/globals.dart';
 
-class HomeLayout extends StatefulWidget {
-  const HomeLayout({Key? key}) : super(key: key);
+class HomeLayout extends StatelessWidget {
 
-  @override
-  State<HomeLayout> createState() => _HomeLayoutState();
-}
-
-class _HomeLayoutState extends State<HomeLayout> {
-  int indexSelected = 0;
   var scaffoldKey = GlobalKey<ScaffoldState>();
   var formKey = GlobalKey<FormState>();
-  List<Widget> screenList = [
-    const TasksScreen(),
-    const DoneScreen(),
-    const ArchiveScreen()
-  ];
-  bool isBottomSheetShown = false;
   IconData currentIcon = Icons.add;
   var titleController = TextEditingController();
   var dateController = TextEditingController();
   var timeController = TextEditingController();
 
   @override
-  void initState() {
-    super.initState();
-    connectDB().then((value) {
-      getTasks().then((value) {
-        setState(() {
-          tasks = value;
-        });
-      });
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: scaffoldKey,
-      appBar: AppBar(
-        title: const Text('Todo'),
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.deepPurple[300],
-        onPressed: () {
-          if (isBottomSheetShown) {
-            Navigator.of(context).maybePop();
-            isBottomSheetShown = false;
-            setState(() {
-              currentIcon = Icons.add;
-              titleController.clear();
-              dateController.clear();
-              timeController.clear();
-            });
-          } else {
-            scaffoldKey.currentState
-                ?.showBottomSheet(
+    return BlocProvider(
+      create: (BuildContext context) => TodoCubit(),
+      child: BlocConsumer<TodoCubit, TodoStates>(
+        listener: (context, state) {},
+        builder: (context, state) => Scaffold(
+          key: scaffoldKey,
+          appBar: AppBar(
+            title: const Text('Todo'),
+          ),
+          floatingActionButton: FloatingActionButton(
+            backgroundColor: Colors.deepPurple[300],
+            onPressed: () {
+              if (TodoCubit.get(context).isBottomSheetShown) {
+                Navigator.of(context).maybePop();
+                TodoCubit.get(context).isBottomSheetShown = false;
+                // setState(() {
+                //   currentIcon = Icons.add;
+                //   titleController.clear();
+                //   dateController.clear();
+                //   timeController.clear();
+                // });
+              } else {
+                scaffoldKey.currentState?.showBottomSheet(
                   enableDrag: false,
                   elevation: 20.0,
                   shape: const RoundedRectangleBorder(
                     borderRadius:
-                        BorderRadius.vertical(top: Radius.circular(40.0)),
+                    BorderRadius.vertical(top: Radius.circular(40.0)),
                   ),
-                  (context) => Padding(
+                      (context) => Padding(
                     padding: const EdgeInsets.all(30.0),
                     child: Form(
                       key: formKey,
@@ -105,10 +86,10 @@ class _HomeLayoutState extends State<HomeLayout> {
                             },
                             onTap: () {
                               showDatePicker(
-                                      context: context,
-                                      initialDate: DateTime.now(),
-                                      firstDate: DateTime.now(),
-                                      lastDate: DateTime.parse('2025-06-01'))
+                                  context: context,
+                                  initialDate: DateTime.now(),
+                                  firstDate: DateTime.now(),
+                                  lastDate: DateTime.parse('2025-06-01'))
                                   .then((value) {
                                 if (value != null) {
                                   dateController.text =
@@ -135,8 +116,8 @@ class _HomeLayoutState extends State<HomeLayout> {
                             },
                             onTap: () {
                               showTimePicker(
-                                      context: context,
-                                      initialTime: TimeOfDay.now())
+                                  context: context,
+                                  initialTime: TimeOfDay.now())
                                   .then((value) {
                                 if (value != null) {
                                   timeController.text =
@@ -154,18 +135,18 @@ class _HomeLayoutState extends State<HomeLayout> {
                             onPressed: () async {
                               if (formKey.currentState!.validate()) {
                                 insertRow(
-                                        titleController.text,
-                                        dateController.text,
-                                        timeController.text,
-                                        'false')
+                                    titleController.text,
+                                    dateController.text,
+                                    timeController.text,
+                                    'false')
                                     .then((value) {
                                   titleController.clear();
                                   dateController.clear();
                                   timeController.clear();
                                   getTasks().then((value) {
-                                    setState(() {
-                                      tasks = value;
-                                    });
+                                    // setState(() {
+                                    //   tasks = value;
+                                    // });
                                   });
                                   FocusScope.of(context).unfocus();
                                   ScaffoldMessenger.of(context).showSnackBar(
@@ -173,11 +154,11 @@ class _HomeLayoutState extends State<HomeLayout> {
                                       content: const Text(
                                           'Task added successfully!'),
                                       duration:
-                                          const Duration(milliseconds: 2500),
+                                      const Duration(milliseconds: 2500),
                                       behavior: SnackBarBehavior.floating,
                                       shape: RoundedRectangleBorder(
                                         borderRadius:
-                                            BorderRadius.circular(10.0),
+                                        BorderRadius.circular(10.0),
                                       ),
                                       backgroundColor: Colors.deepPurple,
                                     ),
@@ -191,40 +172,38 @@ class _HomeLayoutState extends State<HomeLayout> {
                       ),
                     ),
                   ),
-                )
-                .closed
-                .then((value) {
-              isBottomSheetShown = false;
-              setState(() {
-                currentIcon = Icons.add;
-              });
-            });
-            isBottomSheetShown = true;
-            setState(() {
-              currentIcon = Icons.close;
-            });
-          }
-        },
-        child: Icon(currentIcon),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        onTap: (index) {
-          setState(() {
-            indexSelected = index;
-          });
-        },
-        type: BottomNavigationBarType.fixed,
-        currentIndex: indexSelected,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.menu), label: 'Tasks'),
-          BottomNavigationBarItem(icon: Icon(Icons.done), label: 'Done'),
-          BottomNavigationBarItem(icon: Icon(Icons.archive), label: 'Archive'),
-        ],
-      ),
-      body: ConditionalBuilder(
-          condition: tasks.isNotEmpty,
-          builder: (context) => screenList[indexSelected],
-          fallback: (context) => const Center(child: CircularProgressIndicator()),
+                ).closed.then((value) {
+                  TodoCubit.get(context).isBottomSheetShown = false;
+                  // setState(() {
+                  //   currentIcon = Icons.add;
+                  // });
+                });
+                TodoCubit.get(context).isBottomSheetShown = true;
+                // setState(() {
+                //   currentIcon = Icons.close;
+                // });
+              }
+            },
+            child: Icon(currentIcon),
+          ),
+          bottomNavigationBar: BottomNavigationBar(
+            onTap: (index) {
+              TodoCubit.get(context).changeIndexNavigation(index);
+            },
+            type: BottomNavigationBarType.fixed,
+            currentIndex: TodoCubit.get(context).indexSelected,
+            items: const [
+              BottomNavigationBarItem(icon: Icon(Icons.menu), label: 'Tasks'),
+              BottomNavigationBarItem(icon: Icon(Icons.done), label: 'Done'),
+              BottomNavigationBarItem(icon: Icon(Icons.archive), label: 'Archive'),
+            ],
+          ),
+          body: ConditionalBuilder(
+            condition: true,
+            builder: (context) => TodoCubit.get(context).screenList[TodoCubit.get(context).indexSelected],
+            fallback: (context) => const Center(child: CircularProgressIndicator()),
+          ),
+        ),
       ),
     );
   }

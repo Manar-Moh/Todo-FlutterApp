@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:todo/shared/cubit/cubit.dart';
 
 Widget defaultFormField({
   required TextEditingController controller,
@@ -34,58 +35,135 @@ Widget defaultFormField({
 
 
 Widget ItemContainer({
+  required int id,
   required String title,
   required String dateTime,
-})=> Padding(
-  padding: const EdgeInsets.symmetric(horizontal: 20.0),
-  child: Row(
-    mainAxisSize: MainAxisSize.max,
-    children: [
-      Expanded(
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(5),
-            color: Colors.deepPurple,
-          ),
-          height: 80,
-          child: Padding(
-            padding: const EdgeInsets.all(15.0),
-            child: Row(
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children:[
-                    Text(
-                      title,
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 17,
-                          fontWeight: FontWeight.bold
+  required void Function()? onPressDone,
+  required void Function()? onPressArchive,
+  required TodoCubit cubit,
+})=> Dismissible(
+  key: Key(id.toString()),
+  onDismissed: (direction) {
+    cubit.DeleteTask(id: id);
+  },
+  child:   Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+    child: Row(
+      mainAxisSize: MainAxisSize.max,
+      children: [
+        Expanded(
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(5),
+              color: Colors.deepPurple,
+            ),
+            height: 100,
+            child: Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children:[
+                      Text(
+                        title,
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 3,),
-                    Text(
-                      dateTime,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 13,
+                      const SizedBox(height: 3,),
+                      Expanded(
+                        child: Text(
+                          dateTime,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 13,
+                          ),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                // SizedBox(
-                //   width: 40,
-                //   child: FloatingActionButton(
-                //       onPressed: (){},
-                //       backgroundColor: Colors.white,
-                //       child: const Icon(Icons.done,size: 20,color: Colors.deepPurple,),
-                //   ),
-                // ),
-              ],
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: onPressDone,
+                        icon: const Icon(Icons.check_box,color: Colors.white),
+                      ),
+                      IconButton(
+                        onPressed: onPressArchive,
+                        icon: const Icon(Icons.archive,color: Colors.white),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-      ),
-    ],
+      ],
+    ),
+  ),
+);
+
+Widget ItemDoneContainer({
+  required int id,
+  required String title,
+  required String dateTime,
+  required TodoCubit cubit,
+})=> Dismissible(
+  key: Key(id.toString()),
+  onDismissed: (direction) {
+    cubit.DeleteTask(id: id);
+  },
+  child:   Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+    child: Row(
+      mainAxisSize: MainAxisSize.max,
+      children: [
+        Expanded(
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(5),
+              color: Colors.deepPurple,
+            ),
+            height: 100,
+            child: Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children:[
+                      Text(
+                        title,
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold
+                        ),
+                      ),
+                      const SizedBox(height: 3,),
+                      Expanded(
+                        child: Text(
+                          dateTime,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    ),
   ),
 );

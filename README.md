@@ -7,6 +7,6 @@ Once they are done with their tasks they can also remove them from
 the list.
 
 
-[![Watch the video](https://i.imgur.com/vKb2F1B.png)](https://github.com/Manar-Moh/Todo-FlutterApp/master/demo.m4v)
+[![Watch the video](https://images.app.goo.gl/7AyBjTD7FawBj4sB9)](https://youtu.be/2yb_02NwX7Y)
 
 
